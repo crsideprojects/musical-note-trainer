@@ -1,0 +1,277 @@
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --correct: #1a7f37;
+  --correct-bg: rgba(26, 127, 55, 0.12);
+  --incorrect: #cf222e;
+  --incorrect-bg: rgba(207, 34, 46, 0.12);
+
+  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --correct: #4ade80;
+    --correct-bg: rgba(74, 222, 128, 0.15);
+    --incorrect: #f87171;
+    --incorrect-bg: rgba(248, 113, 113, 0.15);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+a {
+  color: var(--accent);
+}
+
+.app-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-title {
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-h);
+}
+
+main {
+  padding: 20px;
+  flex: 1;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mode-menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.mode-card {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.mode-card:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.mode-card h2 {
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+
+.mode-card p {
+  margin: 0;
+  color: var(--text);
+}
+
+.quiz-runner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.quiz-runner__score {
+  font-weight: 600;
+}
+
+.staff-renderer svg {
+  max-width: 100%;
+}
+
+.choice-answer-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.choice-button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.choice-button:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.choice-button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.quiz-feedback {
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.quiz-feedback--correct {
+  background: var(--correct-bg);
+  color: var(--correct);
+}
+
+.quiz-feedback--incorrect {
+  background: var(--incorrect-bg);
+  color: var(--incorrect);
+}
+
+.quiz-feedback button {
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.fingerboard-diagram {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.fingerboard-diagram th,
+.fingerboard-diagram td {
+  border: 1px solid var(--border);
+  text-align: center;
+  padding: 4px;
+}
+
+.fingerboard-cell {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  min-height: 40px;
+  align-items: center;
+}
+
+.finger-dot {
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  cursor: default;
+  padding: 0;
+}
+
+button.finger-dot {
+  cursor: pointer;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.finger-dot--highlighted {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.finger-dot--selected {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.reference-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.reference-controls select {
+  min-height: 40px;
+}
+
+.reference-staves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
