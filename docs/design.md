@@ -3,38 +3,68 @@
 ## Architecture: where the instrument seam lives
 
 The repo is named `musical-note-trainer`, not `cello-note-trainer`, because
-other instruments may be added later (unspecified which). The only
-extensibility investment made for that in v1 is a folder boundary and one
-shared TypeScript contract — no plugin registry, dynamic instrument loader, or
-generalized "technique dimension" framework. That's deliberate: building more
-than this now would be speculative work for instruments that aren't
-specified yet.
+other instruments were always meant to be added later. Violin is the second
+one — the first real test of the `Technique<TAction>` boundary described
+below, rather than a hypothetical justification for it. Cello and violin are
+both fretless, fingered string instruments (same "string + position + finger
+→ pitch" structure, different constants), so adding violin meant extracting
+the position/pattern math that used to live directly in
+`instruments/cello/technique.ts` into a shared, parameterized engine — a
+data/config extraction, not a rewrite. There's still no plugin registry or
+dynamic instrument loader: a third instrument with a genuinely different
+technique model (frets, valves, keys) would only need to implement
+`Technique<TAction>` on its own terms, not fit into the string-instrument
+engine.
 
 ```
 src/
   core/
     music/       Pitch, Clef, enharmonic-equivalence, staff-position math.
-                  Pure functions, no React, no cello knowledge.
+                  Pure functions, no React, no instrument knowledge.
     quiz/         QuizModeConfig<TPrompt, TAnswer> contract + QuizRunner,
                   shared by every mode regardless of instrument.
     instrument/   Technique<TAction> — the one interface an instrument's
                   technique model must implement, plus a generic conformance
                   test suite any implementation can be run against.
+                  stringInstrumentEngine.ts — the shared position/pattern math
+                  for fretless string instruments (cello, violin); factory,
+                  not a base class, parameterized by open strings + position/
+                  pattern tables.
+                  StringFingerboardDiagram.tsx — generic string×position grid,
+                  used directly by both instruments.
+                  modes/createFingeringMode.tsx, createSameNoteMode.tsx —
+                  generic quiz mode factories over any StringInstrumentEngine.
     storage/      localStorage wrapper, namespaced by schema version + instrument.
     ui/           StaffRenderer (VexFlow) — instrument-agnostic.
   instruments/
     cello/
-      technique.ts                   Fingering/position model (see fingering-model.md).
-      FingerboardDiagram.tsx
-      modes/                         fingeringMode.ts, sameNoteMode.ts
+      technique.ts   Cello's open strings + position/pattern data (see
+                      fingering-model.md), calling createStringInstrumentEngine.
       technique.conformance.test.ts  Runs the generic suite against cello.
-  app/             Routing, pages, mode-selection menu.
+    violin/
+      technique.ts   Violin's open strings + position/pattern data, same shape.
+      technique.conformance.test.ts  Same generic suite, against violin.
+  instruments/registry.ts   The list of InstrumentDef — id, label, which
+                             clefs it reads, its four QuizModeConfig instances,
+                             its engine. This is the only place that knows both
+                             instruments exist at once.
+  app/
+    InstrumentContext.tsx   Selected-instrument state (localStorage-persisted)
+                             + the header selector.
+    Routing, pages, mode-selection menu.
 ```
 
 Note ID and Enharmonics only touch `core/music` and live entirely in `core` —
 confirms the Pitch/Clef model really is instrument-agnostic, not just in
-theory. Only Fingering and Same-note-different-strings touch
-`instruments/cello`.
+theory. Note ID is a factory (`createNoteIdMode(instrumentId, clefs)`) rather
+than a static export, because *which clefs get quizzed* is instrument-specific
+(violin never reads bass or tenor clef) even though the underlying logic
+isn't. Enharmonics stays a single shared instance — naming a pitch's
+alternate spelling has nothing to do with which instrument is selected, so
+there's no reason to fork its logic or its progress tracking. Fingering and
+Same-note-different-strings are generic factories
+(`core/instrument/modes/`) over any `StringInstrumentEngine`, instantiated
+once per instrument in the registry.
 
 ## The Technique<TAction> contract
 
@@ -94,26 +124,38 @@ spelling — the only alternatives would be C𝄪/E𝄫, F𝄪/A𝄫, and G𝄪/
 accidentals. The Enharmonics quiz mode excludes these three pitch classes
 from question generation for exactly this reason (verified by a unit test).
 
-## Cello fingering model
+## String instrument fingering models
 
-See [fingering-model.md](fingering-model.md) for the actual convention and
-why it needs a sanity check against a real teacher/method book — fingering
-conventions genuinely vary between methods, and this is a deliberately
-simple, internally-consistent model, not a transcription of any one method.
+See [fingering-model.md](fingering-model.md) for cello's and violin's actual
+conventions and why they need a sanity check against a real teacher/method
+book — fingering conventions genuinely vary between methods, and these are
+deliberately simple, internally-consistent models, not transcriptions of any
+one method.
 
 ### What the conformance suite caught
 
-The first version of the position/pattern tables had a one-semitone gap right
-below the highest reachable note: the closed-position finger pattern's reach
-(5 semitones above a position's base) exceeds the whole-tone step between
-positions, so whichever position happened to be last always left one note
-unreachable just below its own top note. The generic "every in-range pitch
-has at least one action" conformance check failed immediately with the exact
-missing MIDI value, before this ever became a runtime bug in quiz generation.
-The fix: the model's declared MIDI range is now trimmed to the last value
-with provably unbroken coverage below it, computed from the actual fingering
-data rather than a hand-derived formula, so it can't silently drift out of
-sync with the position tables again.
+**Cello** (v1): the first version of the position/pattern tables had a
+one-semitone gap right below the highest reachable note — the closed-position
+finger pattern's reach (5 semitones above a position's base) exceeds the
+whole-tone step between positions, so whichever position happened to be last
+always left one note unreachable just below its own top note. The generic
+"every in-range pitch has at least one action" conformance check failed
+immediately with the exact missing MIDI value, before this ever became a
+runtime bug in quiz generation. The fix, now baked into the shared engine:
+the declared MIDI range is trimmed to the last value with provably unbroken
+coverage below it, computed from the actual fingering data rather than a
+hand-derived formula.
+
+**Violin** (adding the second instrument): an *un*-trimmed version of the same
+gap showed up immediately at the *bottom* of the range instead of the top —
+violin positions I-VII (whole-tone spaced, starting a whole step above the
+open string) leave the note directly above each open string unreachable,
+the same way cello's would without its "Half position." The fix was the same
+fix, not a new one: add a "Half position" to violin's table too (positions I
+and Half both use the "low 2nd finger" pattern, exactly mirroring cello).
+This is the generalization paying for itself twice over — the second
+instrument's bug was caught by a test suite that already existed, and the fix
+was already understood from the first time.
 
 ## Other structural decisions
 
@@ -126,16 +168,38 @@ sync with the position tables again.
   only one instrument today.
 - **localStorage namespacing**: keys are `mnt.v1.<instrumentId>.progress`
   (schema version + instrument both in the key) so a future instrument, or a
-  future data-shape change, can't collide with existing progress data.
+  future data-shape change, can't collide with existing progress data. The
+  selected instrument itself is also persisted, at `mnt.v1.selectedInstrument`.
+- **Instrument selection**: a small React context (`InstrumentContext`) holds
+  the currently selected `InstrumentDef` from the registry; a `<select>` in
+  the header (top of the page, above every route) changes it. Each quiz route
+  is keyed by `` `${instrument.id}-${modeId}` `` so switching instruments
+  mid-quiz remounts with a fresh question instead of carrying over stale
+  state from the other instrument.
 - **Hosting**: GitHub Pages. `vite.config.ts` uses `command === "build"` to
   set `base: "/musical-note-trainer/"` only for production builds — the dev
   server serves from `/` so `npm run dev` doesn't need the production path
   prefix.
 
+## Visual theme
+
+Colors were chosen and verified against the WCAG 2.1 contrast formula, not
+eyeballed. Spartan Green `#18453B` on white is 10.76:1 (light mode accent,
+text, and filled-button backgrounds paired with white text). Dark mode uses a
+lighter `#6FCF97` against the existing `#16171d` background (9.4:1) — a dark
+background needs a *light* accent, so the two modes intentionally use
+different accent colors, not just an opacity tweak of the same one. Filled
+buttons use a dedicated `--accent-contrast` variable (white in light mode,
+near-black `#0a1f19` in dark mode) rather than assuming white text always
+works, since it doesn't against the light-mode-inverted dark-mode accent.
+
 ## Explicitly deferred / not built
 
-- No plugin registry, dynamic instrument loader, or generalized technique
-  framework — unjustified until a second instrument is actually specified.
+- No plugin registry or dynamic instrument loader — with two real instruments
+  in hand, both fit `Technique<TAction>` and the shared string-instrument
+  engine without one. That would only become worth reconsidering for an
+  instrument whose technique model doesn't fit "string + position + finger"
+  at all (winds, brass, keys).
 - No E2E test framework — unit tests on the pure logic (highest bug density,
   cheapest to test) plus manual click-through per mode is proportionate for a
   solo personal tool.

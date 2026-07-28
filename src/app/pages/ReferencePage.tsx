@@ -1,23 +1,28 @@
 import { useState } from "react";
-import { ALL_CLEFS, CLEFS } from "../../core/music/clef";
+import { useInstrument } from "../InstrumentContext";
+import { CLEFS } from "../../core/music/clef";
 import type { Accidental, Letter, Pitch } from "../../core/music/pitch";
 import { ALL_LETTERS, formatPitch } from "../../core/music/pitch";
 import { StaffRenderer } from "../../core/ui/StaffRenderer";
-import { FingerboardDiagram } from "../../instruments/cello/FingerboardDiagram";
-import { fingeringsForPitch } from "../../instruments/cello/technique";
+import { StringFingerboardDiagram } from "../../core/instrument/StringFingerboardDiagram";
 
 export function ReferencePage() {
+  const { instrument } = useInstrument();
   const [letter, setLetter] = useState<Letter>("C");
   const [accidental, setAccidental] = useState<Accidental>(0);
   const [octave, setOctave] = useState(3);
 
   const pitch: Pitch = { letter, accidental, octave };
-  const fingerings = fingeringsForPitch(pitch);
+  const fingerings = instrument.engine.fingeringsForPitch(pitch);
 
   return (
     <div className="page reference-page">
       <h1>Reference</h1>
-      <p>Pick any note to see it on every clef and every place it's playable on the cello.</p>
+      <p>
+        Pick any note to see it on {instrument.clefs.length > 1 ? "every clef" : "the clef"}{" "}
+        the {instrument.label.toLowerCase()} reads, and every place it's playable on the
+        fingerboard.
+      </p>
 
       <div className="reference-controls">
         <label>
@@ -56,7 +61,7 @@ export function ReferencePage() {
       <h2>{formatPitch(pitch)}</h2>
 
       <div className="reference-staves">
-        {ALL_CLEFS.map((clefId) => (
+        {instrument.clefs.map((clefId) => (
           <div key={clefId}>
             <p>{CLEFS[clefId].label}</p>
             <StaffRenderer clef={clefId} pitch={pitch} />
@@ -64,13 +69,17 @@ export function ReferencePage() {
         ))}
       </div>
 
-      <h3>Cello fingerboard</h3>
+      <h3>{instrument.label} fingerboard</h3>
       {fingerings.length === 0 ? (
         <p>This note is outside the modeled fingerboard range.</p>
       ) : (
         <>
           <p>{fingerings.length} way(s) to play this note.</p>
-          <FingerboardDiagram highlighted={fingerings} />
+          <StringFingerboardDiagram
+            engine={instrument.engine}
+            instrumentLabel={instrument.label}
+            highlighted={fingerings}
+          />
         </>
       )}
     </div>

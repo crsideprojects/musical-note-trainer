@@ -54,42 +54,52 @@ function shuffle<T>(items: T[]): T[] {
   return copy;
 }
 
-export const noteIdMode: QuizModeConfig<NoteIdPrompt, Pitch> = {
-  id: "note-id",
-  label: "Note ID",
-  description: "Name the note shown on the staff.",
-  instrumentId: "core",
-  generateQuestion(): Question<NoteIdPrompt> {
-    const clef = randomClef();
-    const pitch = randomPitchInClef(clef);
-    return {
-      id: `${clef}-${formatPitch(pitch)}-${Math.random()}`,
-      prompt: { clef, pitch, choices: generateChoices(pitch, clef) },
-    };
-  },
-  getValidAnswers(question) {
-    return [question.prompt.pitch];
-  },
-  isAnswerCorrect(given, question) {
-    return given.length === 1 && pitchesEqual(given[0], question.prompt.pitch);
-  },
-  formatAnswer: formatPitch,
-  PromptDisplay({ prompt }) {
-    return (
-      <div>
-        <p>{CLEFS[prompt.clef].label} — what note is this?</p>
-        <StaffRenderer clef={prompt.clef} pitch={prompt.pitch} />
-      </div>
-    );
-  },
-  AnswerInput({ question, onSubmit, disabled }) {
-    return (
-      <ChoiceAnswerInput
-        choices={question.prompt.choices}
-        formatChoice={formatPitch}
-        onSubmit={onSubmit}
-        disabled={disabled}
-      />
-    );
-  },
-};
+/**
+ * Which clefs are quizzed depends on the instrument (violin never reads bass or
+ * tenor clef, cello reads all three) — so this is a factory, not a static export,
+ * and progress is tracked per instrument rather than shared.
+ */
+export function createNoteIdMode(
+  instrumentId: string,
+  clefs: ClefId[],
+): QuizModeConfig<NoteIdPrompt, Pitch> {
+  return {
+    id: "note-id",
+    label: "Note ID",
+    description: "Name the note shown on the staff.",
+    instrumentId,
+    generateQuestion(): Question<NoteIdPrompt> {
+      const clef = randomClef(clefs);
+      const pitch = randomPitchInClef(clef);
+      return {
+        id: `${clef}-${formatPitch(pitch)}-${Math.random()}`,
+        prompt: { clef, pitch, choices: generateChoices(pitch, clef) },
+      };
+    },
+    getValidAnswers(question) {
+      return [question.prompt.pitch];
+    },
+    isAnswerCorrect(given, question) {
+      return given.length === 1 && pitchesEqual(given[0], question.prompt.pitch);
+    },
+    formatAnswer: formatPitch,
+    PromptDisplay({ prompt }) {
+      return (
+        <div>
+          <p>{CLEFS[prompt.clef].label} — what note is this?</p>
+          <StaffRenderer clef={prompt.clef} pitch={prompt.pitch} />
+        </div>
+      );
+    },
+    AnswerInput({ question, onSubmit, disabled }) {
+      return (
+        <ChoiceAnswerInput
+          choices={question.prompt.choices}
+          formatChoice={formatPitch}
+          onSubmit={onSubmit}
+          disabled={disabled}
+        />
+      );
+    },
+  };
+}

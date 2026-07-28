@@ -48,7 +48,7 @@ export function QuizRunner<TPrompt, TAnswer>({ config }: QuizRunnerProps<TPrompt
             Valid answer{validAnswers.length > 1 ? "s" : ""}:{" "}
             {validAnswers.map((a) => config.formatAnswer(a)).join(", ")}
           </p>
-          <button type="button" onClick={nextQuestion}>
+          <button type="button" className="btn-primary" onClick={nextQuestion}>
             Next question
           </button>
         </div>

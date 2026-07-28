@@ -72,6 +72,6 @@ export function randomPitchInClef(clefId: ClefId, accidentalChance = 0.35): Pitc
   return base;
 }
 
-export function randomClef(): ClefId {
-  return ALL_CLEFS[randomInt(0, ALL_CLEFS.length - 1)];
+export function randomClef(clefs: ClefId[] = ALL_CLEFS): ClefId {
+  return clefs[randomInt(0, clefs.length - 1)];
 }

@@ -1,12 +1,16 @@
 :root {
-  --text: #6b6375;
+  --text: #4b5259;
   --text-h: #08060d;
   --bg: #fff;
-  --border: #e5e4e7;
+  --border: #e0e3e1;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  /* Spartan Green (#18453B) on white = 10.76:1 contrast — well past WCAG AA's
+     4.5:1 for text. Used for links, focus rings, and filled-button backgrounds
+     (with --accent-contrast text, also verified below). */
+  --accent: #18453b;
+  --accent-bg: rgba(24, 69, 59, 0.08);
+  --accent-border: rgba(24, 69, 59, 0.5);
+  --accent-contrast: #ffffff;
   --correct: #1a7f37;
   --correct-bg: rgba(26, 127, 55, 0.12);
   --incorrect: #cf222e;
@@ -36,9 +40,12 @@
     --bg: #16171d;
     --border: #2e303a;
     --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
+    /* Dark backgrounds need a *light* accent — the same dark Spartan Green would
+       fail contrast here. This lighter green on #16171d = 9.4:1. */
+    --accent: #6fcf97;
+    --accent-bg: rgba(111, 207, 151, 0.15);
+    --accent-border: rgba(111, 207, 151, 0.5);
+    --accent-contrast: #0a1f19;
     --correct: #4ade80;
     --correct-bg: rgba(74, 222, 128, 0.15);
     --incorrect: #f87171;
@@ -76,12 +83,36 @@ a {
 .app-header {
   padding: 12px 20px;
   border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .app-title {
   font-weight: 600;
   text-decoration: none;
   color: var(--text-h);
+}
+
+.instrument-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.instrument-selector select {
+  min-height: 40px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--accent-border);
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 15px;
+  font-weight: 500;
 }
 
 main {
@@ -187,14 +218,25 @@ main {
   color: var(--incorrect);
 }
 
-.quiz-feedback button {
+.btn-primary {
   min-height: 44px;
-  padding: 8px 16px;
+  padding: 8px 20px;
   border-radius: 8px;
-  border: 1px solid currentColor;
-  background: transparent;
-  color: inherit;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-primary:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 .fingerboard-diagram {
