@@ -30,7 +30,7 @@ const celloInstrument: InstrumentDef = {
   label: "Cello",
   clefs: ["bass", "tenor", "treble"],
   modes: {
-    noteId: createNoteIdMode("cello", ["bass", "tenor", "treble"]),
+    noteId: createNoteIdMode("cello", "Cello", ["bass", "tenor", "treble"]),
     enharmonics: enharmonicsMode,
     fingering: createFingeringMode(celloEngine, "cello", "cello"),
     sameNote: createSameNoteMode(celloEngine, "cello", "cello"),
@@ -43,7 +43,7 @@ const violinInstrument: InstrumentDef = {
   label: "Violin",
   clefs: ["treble"],
   modes: {
-    noteId: createNoteIdMode("violin", ["treble"]),
+    noteId: createNoteIdMode("violin", "Violin", ["treble"]),
     enharmonics: enharmonicsMode,
     fingering: createFingeringMode(violinEngine, "violin", "violin"),
     sameNote: createSameNoteMode(violinEngine, "violin", "violin"),

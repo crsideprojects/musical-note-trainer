@@ -73,6 +73,7 @@ export const enharmonicsMode: QuizModeConfig<EnharmonicsPrompt, Pitch> = {
   label: "Enharmonics",
   description: "Name another spelling for the same pitch.",
   instrumentId: "core",
+  scopeLabel: "Enharmonics",
   generateQuestion(): Question<EnharmonicsPrompt> {
     const pitch = randomPitchWithEnharmonic();
     const correct = pickRandom(enharmonicsOf(pitch));

@@ -61,6 +61,7 @@ function shuffle<T>(items: T[]): T[] {
  */
 export function createNoteIdMode(
   instrumentId: string,
+  instrumentLabel: string,
   clefs: ClefId[],
 ): QuizModeConfig<NoteIdPrompt, Pitch> {
   return {
@@ -68,6 +69,7 @@ export function createNoteIdMode(
     label: "Note ID",
     description: "Name the note shown on the staff.",
     instrumentId,
+    scopeLabel: `${instrumentLabel} · Note ID`,
     generateQuestion(): Question<NoteIdPrompt> {
       const clef = randomClef(clefs);
       const pitch = randomPitchInClef(clef);

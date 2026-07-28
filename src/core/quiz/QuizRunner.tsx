@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getStats, recordAttempt } from "../storage/progress";
+import { getStats, recordAttempt, resetStats } from "../storage/progress";
 import type { QuizModeConfig, Question } from "./QuizModeConfig";
 
 interface QuizRunnerProps<TPrompt, TAnswer> {
@@ -14,6 +14,7 @@ export function QuizRunner<TPrompt, TAnswer>({ config }: QuizRunnerProps<TPrompt
   const { PromptDisplay, AnswerInput } = config;
   const answered = given !== null;
   const correct = answered && config.isAnswerCorrect(given, question);
+  const pct = stats.attempted > 0 ? Math.round((stats.correct / stats.attempted) * 100) : null;
 
   function handleSubmit(answer: TAnswer[]) {
     const isCorrect = config.isAnswerCorrect(answer, question);
@@ -26,13 +27,25 @@ export function QuizRunner<TPrompt, TAnswer>({ config }: QuizRunnerProps<TPrompt
     setGiven(null);
   }
 
+  function handleReset() {
+    setStats(resetStats(config.instrumentId, config.id));
+  }
+
   const validAnswers = config.getValidAnswers(question);
 
   return (
     <div className="quiz-runner">
-      <p className="quiz-runner__score" aria-live="polite">
-        Score: {stats.correct} / {stats.attempted}
-      </p>
+      <div className="quiz-runner__score-bar" aria-live="polite">
+        <span className="quiz-runner__score-label">{config.scopeLabel}</span>
+        <span className="quiz-runner__score-value">
+          {stats.correct} / {stats.attempted} correct{pct !== null ? ` (${pct}%)` : ""}
+        </span>
+        {stats.attempted > 0 && (
+          <button type="button" className="quiz-runner__reset" onClick={handleReset}>
+            Reset
+          </button>
+        )}
+      </div>
 
       <PromptDisplay prompt={question.prompt} />
 

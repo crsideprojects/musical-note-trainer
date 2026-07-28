@@ -58,6 +58,7 @@ export function createFingeringMode<TString extends string, TPosition extends st
     label: "Fingering",
     description: "Find the string, position, and finger for a note.",
     instrumentId,
+    scopeLabel: `${instrumentLabel[0].toUpperCase()}${instrumentLabel.slice(1)} · Fingering`,
     generateQuestion(): Question<FingeringPrompt<TString, TPosition>> {
       const pitch = randomPlayablePitch();
       const valid = engine.fingeringsForPitch(pitch);

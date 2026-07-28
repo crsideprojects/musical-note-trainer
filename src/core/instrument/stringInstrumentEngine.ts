@@ -42,6 +42,8 @@ export interface StringInstrumentEngine<TString extends string, TPosition extend
   allFingerings(): StringFingering<TString, TPosition>[];
   formatFingering(fingering: StringFingering<TString, TPosition>): string;
   isFingeringInRange(fingering: StringFingering<TString, TPosition>): boolean;
+  /** true if this fingering is the open string (finger 0, not a thumb position). */
+  isOpenFingering(fingering: StringFingering<TString, TPosition>): boolean;
   /**
    * MIDI range this model guarantees full chromatic coverage over. Computed from
    * the real fingering data (not a hand-derived formula) so it can't silently
@@ -127,13 +129,15 @@ export function createStringInstrumentEngine<TString extends string, TPosition e
     return inRange(fingeringMidi(fingering));
   }
 
+  function isOpenFingering(fingering: StringFingering<TString, TPosition>): boolean {
+    return fingering.finger === 0 && !findPosition(fingering.position).usesThumb;
+  }
+
   function formatFingering(fingering: StringFingering<TString, TPosition>): string {
-    const position = findPosition(fingering.position);
-    const fingerLabel =
-      fingering.finger === 0
-        ? position.usesThumb
-          ? "thumb"
-          : "open"
+    const fingerLabel = isOpenFingering(fingering)
+      ? "open"
+      : fingering.finger === 0
+        ? "thumb"
         : `finger ${fingering.finger}`;
     return `${fingering.string} string, ${fingering.position} position, ${fingerLabel}`;
   }
@@ -152,6 +156,7 @@ export function createStringInstrumentEngine<TString extends string, TPosition e
     allFingerings,
     formatFingering,
     isFingeringInRange,
+    isOpenFingering,
     midiRange,
     technique: {
       actionsForPitch: fingeringsForPitch,

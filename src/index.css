@@ -1,9 +1,15 @@
 :root {
   --text: #4b5259;
   --text-h: #08060d;
-  --bg: #fff;
-  --border: #e0e3e1;
+  /* Warm off-white rather than stark white — the elevated surface (--bg-elevated)
+     is what actually reads as "white," giving cards visible depth against the page. */
+  --bg: #f6f7f4;
+  --bg-elevated: #ffffff;
+  --border: #dfe3e0;
   --code-bg: #f4f3ec;
+  --shadow: 0 1px 3px rgba(24, 45, 38, 0.08), 0 6px 16px rgba(24, 45, 38, 0.07);
+  --shadow-hover: 0 2px 6px rgba(24, 45, 38, 0.1), 0 10px 24px rgba(24, 45, 38, 0.1);
+
   /* Spartan Green (#18453B) on white = 10.76:1 contrast — well past WCAG AA's
      4.5:1 for text. Used for links, focus rings, and filled-button backgrounds
      (with --accent-contrast text, also verified below). */
@@ -11,6 +17,18 @@
   --accent-bg: rgba(24, 69, 59, 0.08);
   --accent-border: rgba(24, 69, 59, 0.5);
   --accent-contrast: #ffffff;
+  /* A second, brighter green for badges/secondary highlights so the palette
+     isn't one flat hue. 5.04:1 on white — still clears AA as text, not just
+     as decoration. */
+  --accent-secondary: #2e7d52;
+  --accent-secondary-bg: rgba(46, 125, 82, 0.1);
+
+  /* Always-dark header band regardless of light/dark mode — white text against
+     it is 9.6:1 at the lighter end of the gradient, so it doesn't need to
+     switch with the theme the way body text/buttons do. */
+  --header-bg: linear-gradient(135deg, #1a4d40, #0d251e);
+  --header-text: #ffffff;
+
   --correct: #1a7f37;
   --correct-bg: rgba(26, 127, 55, 0.12);
   --incorrect: #cf222e;
@@ -37,15 +55,22 @@
   :root {
     --text: #9ca3af;
     --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
+    --bg: #121613;
+    --bg-elevated: #1c2420;
+    --border: #2e3a34;
     --code-bg: #1f2028;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 6px 16px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.4), 0 10px 24px rgba(0, 0, 0, 0.35);
+
     /* Dark backgrounds need a *light* accent — the same dark Spartan Green would
-       fail contrast here. This lighter green on #16171d = 9.4:1. */
+       fail contrast here. This lighter green on #121613 = 9.4:1. */
     --accent: #6fcf97;
     --accent-bg: rgba(111, 207, 151, 0.15);
     --accent-border: rgba(111, 207, 151, 0.5);
     --accent-contrast: #0a1f19;
+    --accent-secondary: #93e6b8;
+    --accent-secondary-bg: rgba(147, 230, 184, 0.12);
+
     --correct: #4ade80;
     --correct-bg: rgba(74, 222, 128, 0.15);
     --incorrect: #f87171;
@@ -81,8 +106,9 @@ a {
 }
 
 .app-header {
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  background: var(--header-bg);
+  color: var(--header-text);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -91,9 +117,10 @@ a {
 }
 
 .app-title {
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.2px;
   text-decoration: none;
-  color: var(--text-h);
+  color: var(--header-text);
 }
 
 .instrument-selector {
@@ -101,22 +128,26 @@ a {
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  color: var(--text-h);
+  color: var(--header-text);
 }
 
 .instrument-selector select {
   min-height: 40px;
   padding: 4px 10px;
   border-radius: 8px;
-  border: 1px solid var(--accent-border);
-  background: var(--bg);
-  color: var(--text-h);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--header-text);
   font-size: 15px;
   font-weight: 500;
 }
 
+.instrument-selector select option {
+  color: var(--text-h);
+}
+
 main {
-  padding: 20px;
+  padding: 24px 20px;
   flex: 1;
 }
 
@@ -129,21 +160,43 @@ main {
 .mode-menu {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .mode-card {
   display: block;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 18px 18px 18px 22px;
   text-decoration: none;
   color: inherit;
+  box-shadow: var(--shadow);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.mode-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--accent);
 }
 
 .mode-card:hover {
-  border-color: var(--accent-border);
-  background: var(--accent-bg);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.mode-card__icon {
+  font-size: 26px;
+  line-height: 1;
+  margin-bottom: 8px;
+  display: block;
 }
 
 .mode-card h2 {
@@ -161,10 +214,45 @@ main {
   flex-direction: column;
   gap: 16px;
   align-items: flex-start;
+  width: 100%;
 }
 
-.quiz-runner__score {
+.quiz-runner__score-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 16px;
+  box-shadow: var(--shadow);
+}
+
+.quiz-runner__score-label {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.quiz-runner__score-value {
+  color: var(--text-h);
   font-weight: 600;
+}
+
+.quiz-runner__reset {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.quiz-runner__reset:hover {
+  color: var(--incorrect);
 }
 
 .staff-renderer svg {
@@ -180,28 +268,34 @@ main {
 .choice-button {
   min-height: 44px;
   min-width: 44px;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 10px 18px;
+  border-radius: 24px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--bg-elevated);
   color: var(--text-h);
   cursor: pointer;
   font-size: 16px;
+  box-shadow: var(--shadow);
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
 }
 
 .choice-button:hover:not(:disabled) {
-  border-color: var(--accent-border);
+  border-color: var(--accent);
   background: var(--accent-bg);
+  transform: translateY(-1px);
 }
 
 .choice-button:disabled {
   cursor: default;
   opacity: 0.6;
+  box-shadow: none;
 }
 
 .quiz-feedback {
-  border-radius: 8px;
-  padding: 12px 16px;
+  border-radius: 10px;
+  padding: 14px 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -267,7 +361,7 @@ main {
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--bg-elevated);
   color: var(--text);
   font-size: 14px;
   cursor: default;
@@ -289,7 +383,7 @@ button.finger-dot {
 
 .finger-dot--selected {
   background: var(--accent);
-  color: white;
+  color: var(--accent-contrast);
   border-color: var(--accent);
 }
 
@@ -303,10 +397,94 @@ button.finger-dot {
   min-height: 40px;
 }
 
+.reference-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reference-card__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.reference-card__nav h2 {
+  font-size: 32px;
+  margin: 0;
+  min-width: 100px;
+  text-align: center;
+}
+
+.reference-card__step {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reference-card__step:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.reference-card__step:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.reference-card__enharmonic {
+  text-align: center;
+  margin: 0;
+  color: var(--accent-secondary);
+  font-weight: 600;
+  background: var(--accent-secondary-bg);
+  border-radius: 999px;
+  padding: 6px 14px;
+  align-self: center;
+}
+
 .reference-staves {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 16px;
+}
+
+.reference-staff {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.reference-staff p {
+  margin: 0 0 4px;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.reference-fingering h3 {
+  margin: 0 0 10px;
+}
+
+.reference-fingering__nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .sr-only {

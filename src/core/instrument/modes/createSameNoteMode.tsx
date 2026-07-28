@@ -50,6 +50,7 @@ export function createSameNoteMode<TString extends string, TPosition extends str
     label: "Same note, different strings",
     description: "Find every place on the fingerboard that plays a given note.",
     instrumentId,
+    scopeLabel: `${instrumentLabel[0].toUpperCase()}${instrumentLabel.slice(1)} · Same Note`,
     generateQuestion(): Question<SameNotePrompt> {
       const pitch = randomPitchWithMultipleFingerings();
       return { id: `${formatPitch(pitch)}-${Math.random()}`, prompt: { pitch } };

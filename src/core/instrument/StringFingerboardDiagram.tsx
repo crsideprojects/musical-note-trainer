@@ -1,5 +1,11 @@
 import type { StringFingering, StringInstrumentEngine } from "./stringInstrumentEngine";
 
+interface DiagramRow<TPosition extends string> {
+  label: string;
+  position: TPosition;
+  isOpenRow?: boolean;
+}
+
 interface StringFingerboardDiagramProps<TString extends string, TPosition extends string> {
   engine: StringInstrumentEngine<TString, TPosition>;
   instrumentLabel: string;
@@ -9,6 +15,8 @@ interface StringFingerboardDiagramProps<TString extends string, TPosition extend
   selectable?: boolean;
   selected?: StringFingering<TString, TPosition>[];
   onToggle?: (fingering: StringFingering<TString, TPosition>) => void;
+  /** Render only the row(s) matching this filter, e.g. to show one position at a time in a compact card. */
+  rowFilter?: (row: DiagramRow<TPosition>) => boolean;
 }
 
 function fingeringKey<TString extends string, TPosition extends string>(
@@ -31,12 +39,14 @@ export function StringFingerboardDiagram<TString extends string, TPosition exten
   selectable = false,
   selected = [],
   onToggle,
+  rowFilter,
 }: StringFingerboardDiagramProps<TString, TPosition>) {
   const openRowPosition = engine.positions[0].name;
-  const rows: { label: string; position: TPosition; isOpenRow?: boolean }[] = [
+  const allRows: DiagramRow<TPosition>[] = [
     { label: "Open", position: openRowPosition, isOpenRow: true },
     ...engine.positions.map((p) => ({ label: p.name, position: p.name })),
   ];
+  const rows = rowFilter ? allRows.filter(rowFilter) : allRows;
 
   return (
     <table className="fingerboard-diagram">

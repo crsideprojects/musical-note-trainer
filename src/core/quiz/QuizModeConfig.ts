@@ -17,6 +17,8 @@ export interface QuizModeConfig<TPrompt, TAnswer> {
   description: string;
   /** Namespaces progress storage — "core" for instrument-agnostic modes, else e.g. "cello". */
   instrumentId: string;
+  /** Human-readable, mode-and-instrument-specific label for the score display, e.g. "Cello · Fingering". */
+  scopeLabel: string;
   generateQuestion(): Question<TPrompt>;
   getValidAnswers(question: Question<TPrompt>): TAnswer[];
   isAnswerCorrect(given: TAnswer[], question: Question<TPrompt>): boolean;

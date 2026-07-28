@@ -45,6 +45,14 @@ export function getStats(instrumentId: string, modeId: string): ModeStats {
   return load(instrumentId)[modeId] ?? { correct: 0, attempted: 0 };
 }
 
+export function resetStats(instrumentId: string, modeId: string): ModeStats {
+  const store = load(instrumentId);
+  const cleared: ModeStats = { correct: 0, attempted: 0 };
+  store[modeId] = cleared;
+  save(instrumentId, store);
+  return cleared;
+}
+
 export function getAllStats(instrumentId: string): ProgressStore {
   return load(instrumentId);
 }
