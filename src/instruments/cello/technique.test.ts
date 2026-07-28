@@ -30,6 +30,11 @@ describe("same note on different strings", () => {
     expect(options).toContainEqual({ string: "D", position: "I", finger: 4 });
     expect(options.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("orders the open string first when one exists, ahead of any fingered/thumb-position options", () => {
+    const options = fingeringsForPitch({ letter: "D", accidental: 0, octave: 3 });
+    expect(options[0]).toEqual({ string: "D", position: "I", finger: 0 });
+  });
 });
 
 describe("thumb position", () => {

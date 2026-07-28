@@ -44,9 +44,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/note-id" element={<ModeRoute pick={(i) => i.modes.noteId} />} />
-            <Route path="/enharmonics" element={<ModeRoute pick={(i) => i.modes.enharmonics} />} />
-            <Route path="/fingering" element={<ModeRoute pick={(i) => i.modes.fingering} />} />
-            <Route path="/same-note" element={<ModeRoute pick={(i) => i.modes.sameNote} />} />
             <Route path="/reference" element={<ReferencePage />} />
           </Routes>
         </main>

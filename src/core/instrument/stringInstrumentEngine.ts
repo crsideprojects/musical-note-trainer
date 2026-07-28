@@ -119,10 +119,23 @@ export function createStringInstrumentEngine<TString extends string, TPosition e
     return midi >= midiRange.min && midi <= midiRange.max;
   }
 
+  /**
+   * Lower is "easier" — open string first, then ascending by the position's
+   * baseOffset (positions are already defined in increasing-difficulty order
+   * in each instrument's data, so this needs no separate per-instrument
+   * ranking table).
+   */
+  function fingeringDifficulty(fingering: StringFingering<TString, TPosition>): number {
+    if (isOpenFingering(fingering)) return -1;
+    return findPosition(fingering.position).baseOffset;
+  }
+
   function fingeringsForPitch(pitch: Pitch): StringFingering<TString, TPosition>[] {
     const targetMidi = toMidi(pitch);
     if (!inRange(targetMidi)) return [];
-    return allFingeringsUnfiltered().filter((f) => fingeringMidi(f) === targetMidi);
+    return allFingeringsUnfiltered()
+      .filter((f) => fingeringMidi(f) === targetMidi)
+      .sort((a, b) => fingeringDifficulty(a) - fingeringDifficulty(b));
   }
 
   function isFingeringInRange(fingering: StringFingering<TString, TPosition>): boolean {

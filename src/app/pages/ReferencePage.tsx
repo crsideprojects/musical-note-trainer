@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useInstrument } from "../InstrumentContext";
 import { CLEFS } from "../../core/music/clef";
 import type { Accidental, Letter, Pitch } from "../../core/music/pitch";
 import { ALL_LETTERS, enharmonicsOf, formatPitch, spellingsForMidi, toMidi } from "../../core/music/pitch";
 import { StaffRenderer } from "../../core/ui/StaffRenderer";
-import { StringFingerboardDiagram } from "../../core/instrument/StringFingerboardDiagram";
+import { FingeringExplorer } from "../../core/instrument/FingeringExplorer";
 
 const MIN_MIDI = toMidi({ letter: "C", accidental: -1, octave: 1 });
 const MAX_MIDI = toMidi({ letter: "B", accidental: 1, octave: 6 });
@@ -22,30 +22,8 @@ function stepPitch(pitch: Pitch, delta: number): Pitch {
 export function ReferencePage() {
   const { instrument } = useInstrument();
   const [pitch, setPitch] = useState<Pitch>({ letter: "C", accidental: 0, octave: 3 });
-  const [fingeringIndex, setFingeringIndex] = useState(0);
 
-  const fingerings = instrument.engine.fingeringsForPitch(pitch);
   const enharmonics = enharmonicsOf(pitch);
-
-  // A new card should always start on its first fingering, not whatever index
-  // was selected on the previous note.
-  useEffect(() => {
-    setFingeringIndex(0);
-  }, [toMidi(pitch)]);
-
-  const safeIndex = fingerings.length > 0 ? fingeringIndex % fingerings.length : 0;
-  const selectedFingering = fingerings[safeIndex];
-
-  const rowFilter = selectedFingering
-    ? (row: { position: string; isOpenRow?: boolean }) =>
-        instrument.engine.isOpenFingering(selectedFingering)
-          ? row.isOpenRow === true
-          : !row.isOpenRow && row.position === selectedFingering.position
-    : undefined;
-
-  function cycleFingering(delta: number) {
-    setFingeringIndex((i) => (i + delta + fingerings.length) % fingerings.length);
-  }
 
   return (
     <div className="page reference-page">
@@ -137,42 +115,7 @@ export function ReferencePage() {
 
         <div className="reference-fingering">
           <h3>{instrument.label} fingering</h3>
-          {fingerings.length === 0 || !selectedFingering ? (
-            <p>This note is outside the modeled fingerboard range.</p>
-          ) : (
-            <>
-              <div className="reference-fingering__nav">
-                <button
-                  type="button"
-                  className="reference-card__step"
-                  disabled={fingerings.length <= 1}
-                  onClick={() => cycleFingering(-1)}
-                  aria-label="Previous fingering"
-                >
-                  ‹
-                </button>
-                <span>
-                  Fingering {safeIndex + 1} of {fingerings.length}:{" "}
-                  {instrument.engine.formatFingering(selectedFingering)}
-                </span>
-                <button
-                  type="button"
-                  className="reference-card__step"
-                  disabled={fingerings.length <= 1}
-                  onClick={() => cycleFingering(1)}
-                  aria-label="Next fingering"
-                >
-                  ›
-                </button>
-              </div>
-              <StringFingerboardDiagram
-                engine={instrument.engine}
-                instrumentLabel={instrument.label}
-                highlighted={[selectedFingering]}
-                rowFilter={rowFilter}
-              />
-            </>
-          )}
+          <FingeringExplorer engine={instrument.engine} instrumentLabel={instrument.label} pitch={pitch} />
         </div>
       </div>
     </div>

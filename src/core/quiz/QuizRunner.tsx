@@ -47,7 +47,7 @@ export function QuizRunner<TPrompt, TAnswer>({ config }: QuizRunnerProps<TPrompt
         )}
       </div>
 
-      <PromptDisplay prompt={question.prompt} />
+      <PromptDisplay key={question.id} prompt={question.prompt} />
 
       <AnswerInput question={question} onSubmit={handleSubmit} disabled={answered} />
 

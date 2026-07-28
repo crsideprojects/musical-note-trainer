@@ -1,7 +1,12 @@
-import type { Pitch } from "./pitch";
+import type { Letter, Pitch } from "./pitch";
 import { pickRandom, randomInt, toMidi } from "./pitch";
 
 export type ClefId = "bass" | "tenor" | "treble";
+
+interface StaffPosition {
+  letter: Letter;
+  octave: number;
+}
 
 export interface ClefInfo {
   id: ClefId;
@@ -9,6 +14,13 @@ export interface ClefInfo {
   vexflowClef: "bass" | "tenor" | "treble";
   /** Practical practice range for question generation — staff plus a few ledger lines. */
   range: { min: Pitch; max: Pitch };
+  /**
+   * The 5 lines and 4 spaces, bottom to top, as natural letters (accidentals
+   * don't change which line/space a note sits on) — used for the staff-reading
+   * hint overlay. Standard mnemonics: bass "Good Boys Do Fine Always" / "All
+   * Cows Eat Grass"; treble "Every Good Boy Does Fine" / "FACE".
+   */
+  staffPositions: StaffPosition[];
 }
 
 export const CLEFS: Record<ClefId, ClefInfo> = {
@@ -20,6 +32,17 @@ export const CLEFS: Record<ClefId, ClefInfo> = {
       min: { letter: "E", accidental: 0, octave: 2 },
       max: { letter: "E", accidental: 0, octave: 4 },
     },
+    staffPositions: [
+      { letter: "G", octave: 2 },
+      { letter: "A", octave: 2 },
+      { letter: "B", octave: 2 },
+      { letter: "C", octave: 3 },
+      { letter: "D", octave: 3 },
+      { letter: "E", octave: 3 },
+      { letter: "F", octave: 3 },
+      { letter: "G", octave: 3 },
+      { letter: "A", octave: 3 },
+    ],
   },
   tenor: {
     id: "tenor",
@@ -29,6 +52,17 @@ export const CLEFS: Record<ClefId, ClefInfo> = {
       min: { letter: "A", accidental: 0, octave: 2 },
       max: { letter: "C", accidental: 0, octave: 5 },
     },
+    staffPositions: [
+      { letter: "D", octave: 3 },
+      { letter: "E", octave: 3 },
+      { letter: "F", octave: 3 },
+      { letter: "G", octave: 3 },
+      { letter: "A", octave: 3 },
+      { letter: "B", octave: 3 },
+      { letter: "C", octave: 4 },
+      { letter: "D", octave: 4 },
+      { letter: "E", octave: 4 },
+    ],
   },
   treble: {
     id: "treble",
@@ -38,6 +72,17 @@ export const CLEFS: Record<ClefId, ClefInfo> = {
       min: { letter: "C", accidental: 0, octave: 4 },
       max: { letter: "C", accidental: 0, octave: 6 },
     },
+    staffPositions: [
+      { letter: "E", octave: 4 },
+      { letter: "F", octave: 4 },
+      { letter: "G", octave: 4 },
+      { letter: "A", octave: 4 },
+      { letter: "B", octave: 4 },
+      { letter: "C", octave: 5 },
+      { letter: "D", octave: 5 },
+      { letter: "E", octave: 5 },
+      { letter: "F", octave: 5 },
+    ],
   },
 };
 

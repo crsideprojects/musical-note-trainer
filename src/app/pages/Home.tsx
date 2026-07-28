@@ -6,25 +6,7 @@ const MODES = [
     path: "/note-id",
     icon: "🎼",
     label: "Note ID",
-    description: "Name the note shown on the staff.",
-  },
-  {
-    path: "/enharmonics",
-    icon: "🔁",
-    label: "Enharmonics",
-    description: "Name another spelling for the same pitch.",
-  },
-  {
-    path: "/fingering",
-    icon: "👆",
-    label: "Fingering",
-    description: "Find the string, position, and finger for a note.",
-  },
-  {
-    path: "/same-note",
-    icon: "🧭",
-    label: "Same note, different strings",
-    description: "Find every place on the fingerboard that plays a given note.",
+    description: "Name the note on the staff, or its enharmonic spelling — with a line/space hint and a “how do I play this?” reveal.",
   },
   {
     path: "/reference",
